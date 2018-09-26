@@ -1,10 +1,15 @@
 package com.example.home.jsonconsumer;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.os.Build;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue queue;
     private TextView mTextView;
 
+    private final static int NOTIFICACION_ID = 0;
+    private final static String CHANNEL_ID = "NOTIFICACION";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,20 +46,34 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 obtenerDatosVolley();
-                //Construccion de la notificacion;
-                NotificationCompat.Builder builder= new NotificationCompat.Builder(v.getContext());
-                builder.setAutoCancel(true);
-                builder.setContentTitle("Notificacion Basica");
-                builder.setContentText("Done el listado de personas!");
-                builder.setSubText("Toca para ver la documentacion acerca de Anndroid.");
-
-                //Enviar la notificacion
-                NotificationManager notificationManager= (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.notify(1, builder.build());
-
-
+                createNotificationChannel();
+                createNotification();
             }
         });
+    }
+
+    private void createNotificationChannel(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            CharSequence name = "Noticacion";
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+    }
+
+    private void createNotification(){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
+        builder.setSmallIcon(R.drawable.ic_sms_black_24dp);
+        builder.setContentTitle("Notificacion Android");
+        builder.setContentText("Cargado el listado de nombres");
+        builder.setColor(Color.BLUE);
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        builder.setLights(Color.MAGENTA, 1000, 1000);
+        builder.setVibrate(new long[]{1000,1000,1000,1000,1000});
+        builder.setDefaults(Notification.DEFAULT_SOUND);
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(getApplicationContext());
+        notificationManagerCompat.notify(NOTIFICACION_ID, builder.build());
     }
 
     public void obtenerDatosVolley(){
